@@ -214,29 +214,54 @@ class SaM:
 
 def load_samcode(filename):
     instructions = []
+    labels = {}
+    pending = []  
+
     with open(filename) as file:
-        for line in file:
-            parts = line.strip().split(maxsplit=1)
-            if not parts or parts[0].startswith("#"):
-                continue
+        lines = file.readlines()
 
-            opcode = parts[0].upper()
-            arg = None
+    
+    for idx, line in enumerate(lines):
+        parts = line.strip().split()
+        if not parts or parts[0].startswith("#"):
+            continue
 
-            if len(parts) > 1:
-                raw_arg = parts[1].strip()
-                if raw_arg.startswith('"') and raw_arg.endswith('"'):
-                    arg = raw_arg.strip('"')
-                elif raw_arg.startswith("'") and raw_arg.endswith("'"):
-                    arg = ord(raw_arg.strip("'"))
-                else:
-                    try:
-                        if '.' in raw_arg:
-                            arg = float(raw_arg)
-                        else:
-                            arg = int(raw_arg)
-                    except ValueError:
-                        arg = raw_arg
+        
+        if parts[0].endswith(":"):
+            label_name = parts[0][:-1]
+            labels[label_name] = len(instructions)
+            parts = parts[1:]  
 
-            instructions.append(Instruction(opcode, arg))
+        if not parts:  
+            continue
+
+        opcode = parts[0].upper()
+        arg = None
+
+        if len(parts) > 1:
+            raw_arg = parts[1].strip()
+            if raw_arg.startswith('"') and raw_arg.endswith('"'):
+                arg = raw_arg.strip('"')
+            elif raw_arg.startswith("'") and raw_arg.endswith("'"):
+                arg = ord(raw_arg.strip("'"))
+            else:
+                try:
+                    if '.' in raw_arg:
+                        arg = float(raw_arg)
+                    else:
+                        arg = int(raw_arg)
+                except ValueError:
+                    arg = raw_arg  
+
+        instructions.append(Instruction(opcode, arg))
+        if isinstance(arg, str):  # Pode ser label
+            pending.append((len(instructions)-1, arg))
+
+    
+    for idx, label_name in pending:
+        if label_name in labels:
+            instructions[idx].arg = labels[label_name]
+        else:
+            raise Exception(f"Label não encontrado: {label_name}")
+
     return instructions

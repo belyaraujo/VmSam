@@ -1,0 +1,54 @@
+{
+  "type": "Programa",
+  "declaracoes": [
+    {
+      "type": "Declaracao",
+      "tipo": "TYPE_INT",
+      "id": "x"
+    }
+  ],
+  "main": {
+    "type": "MainFunction",
+    "comandos": [
+      {
+        "type": "Atribuicao",
+        "id": "x",
+        "expr": {
+          "type": "BinOp",
+          "op": "PLUS",
+          "left": {
+            "type": "Literal",
+            "value": "2"
+          },
+          "right": {
+            "type": "BinOp",
+            "op": "MULTIPLY",
+            "left": {
+              "type": "Literal",
+              "value": "3"
+            },
+            "right": {
+              "type": "BinOp",
+              "op": "PLUS",
+              "left": {
+                "type": "Literal",
+                "value": "4"
+              },
+              "right": {
+                "type": "Literal",
+                "value": "1"
+              }
+            }
+          }
+        }
+      },
+      {
+        "type": "Return",
+        "expr": {
+          "type": "Var",
+          "name": "x"
+        }
+      }
+    ]
+  }
+}

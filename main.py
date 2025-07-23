@@ -1,37 +1,41 @@
 from vmSam import load_samcode, SaM
 from analisador_lex import tokenize
+from parser import parse
 
-# x = 18
-# if x < 20:
-#     return 0
-#else:
-    # return 1
-
-    # for i in range(5):
-    #     print(i)
-
-# ---------------------------- Teste -----------------------------
 
 code = """
-int f(int x){
-x++;
-return x;
-}
-main(){
-int x = 2;
-x = f(x);
+int x;
+function main() {
+  x = 2 + 3 * (4 + 1);
+  return x;
 }
 
 """
 
-tokens = tokenize(code)
+# tokens = tokenize(code)
+# print("---- TOKENS ----")
+# for token in tokens:
+#     print(token)
 
-for token in tokens:
-    print(token)
+
+
+# print("\n=== AST ===")
+# ast = parse(tokens)
+# print(ast)
+
+import json
+
+tokens = tokenize(code)
+ast = parse(tokens)
+
+with open("ast.json", "w", encoding="utf-8") as f:
+    json.dump(ast, f, indent=2)
+
+print("Arquivo 'ast.json' gerado com sucesso!")
+
 
 # if __name__ == "__main__":
-#     instructions = load_samcode("exemplo.sam")
-#     vm = SaM(instructions)
-#     vm.run()
-#     print("Resultado final:", vm.stack)
-
+#      instructions = load_samcode("exemplo.sam")
+#      vm = SaM(instructions)
+#      vm.run()
+#      print("Resultado final:", vm.stack)

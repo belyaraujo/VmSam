@@ -1,5 +1,6 @@
 import re
 
+
 regex_table = {
     # Estruturas de Decisão e Repetição
     r"^if$": "IF",
