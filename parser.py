@@ -1,3 +1,6 @@
+# parser.py
+# Recebe uma lista de tokens gerados pelo lexer e constrói a AST com base em uma gramática LL(1)
+
 tokens = []
 current = 0
 
@@ -51,9 +54,10 @@ def parse_funcao_principal():
 
 def parse_comandos():
     cmds = []
-    while not match('RBRACE'):
+    while not match('RBRACE') and not match('END_IF') and not match('END_WHILE'):
         cmds.append(parse_comando())
     return cmds
+
 
 def parse_comando():
     if match('RETURN'):
@@ -61,11 +65,73 @@ def parse_comando():
         expr = parse_expressao()
         expect('SEMICOLON')
         return {'type': 'Return', 'expr': expr}
+
+    if match('IF'):
+        advance()
+        expect('LPAREN')
+        cond = parse_expressao()
+        expect('RPAREN')
+        expect('LBRACE')
+        then_block = parse_comandos()
+        expect('RBRACE')
+
+        else_block = None
+        if match('ELSE'):
+            advance()
+            expect('LBRACE')
+            else_block = parse_comandos()
+            expect('RBRACE')
+
+        if match('END_IF'):
+            advance()
+
+        return {'type': 'If', 'cond': cond, 'then': then_block, 'else': else_block}
+
+    if match('WHILE'):
+        advance()
+        expect('LPAREN')
+        cond = parse_expressao()
+        expect('RPAREN')
+        expect('LBRACE')
+        body = parse_comandos()
+        expect('RBRACE')
+
+        if match('END_WHILE'):
+            advance()
+
+        return {'type': 'While', 'cond': cond, 'body': body}
+
     if match('TYPE_INT') or match('TYPE_DOUBLE') or match('TYPE_STRING'):
         return parse_declaracao()
-    cmd = parse_atribuicao()
-    expect('SEMICOLON')
-    return cmd
+
+    if match('IDENTIFIER'):
+        # Verifica se é atribuição ou chamada de função
+        if (current + 1 < len(tokens)) and tokens[current + 1]['type'] == 'ASSIGN':
+            cmd = parse_atribuicao()
+            expect('SEMICOLON')
+            return cmd
+        elif (current + 1 < len(tokens)) and tokens[current + 1]['type'] == 'LPAREN':
+            cmd = parse_chamada_funcao()
+            expect('SEMICOLON')
+            return cmd
+        else:
+            raise Exception(f"Comando inesperado: {tokens[current]['type']}")
+
+    raise Exception(f"Comando inesperado: {tokens[current]['type'] if current < len(tokens) else 'EOF'}")
+
+def parse_chamada_funcao():
+    nome = expect('IDENTIFIER')['value']
+    expect('LPAREN')
+    args = []
+    if not match('RPAREN'):  # Se não for fechamento, tem argumentos
+        args.append(parse_expressao())
+        while match('COMMA'):
+            advance()
+            args.append(parse_expressao())
+    expect('RPAREN')
+    return {'type': 'ChamadaFuncao', 'name': nome, 'args': args}
+
+
 
 def parse_atribuicao():
     ident = expect('IDENTIFIER')['value']
@@ -74,6 +140,17 @@ def parse_atribuicao():
     return {'type': 'Atribuicao', 'id': ident, 'expr': expr}
 
 def parse_expressao():
+    return parse_relacional()
+
+def parse_relacional():
+    left = parse_aditivo()
+    while match('GREATER_THAN') or match('LESS_THAN') or match('EQUAL'):
+        op = advance()['type']
+        right = parse_aditivo()
+        left = {'type': 'BinOp', 'op': op, 'left': left, 'right': right}
+    return left
+
+def parse_aditivo():
     left = parse_termo()
     while match('PLUS') or match('MINUS'):
         op = advance()['type']

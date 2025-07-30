@@ -1,12 +1,18 @@
 from vmSam import load_samcode, SaM
 from analisador_lex import tokenize
 from parser import parse
-
+import json
 
 code = """
-int x;
 function main() {
-  x = 2 + 3 * (4 + 1);
+  int x;
+  x = 5;
+  if (x > 0) {
+    x = x - 1;
+  } else {
+    x = 0;
+  }
+  end-if
   return x;
 }
 
@@ -23,15 +29,11 @@ function main() {
 # ast = parse(tokens)
 # print(ast)
 
-import json
+
 
 tokens = tokenize(code)
 ast = parse(tokens)
-
-with open("ast.json", "w", encoding="utf-8") as f:
-    json.dump(ast, f, indent=2)
-
-print("Arquivo 'ast.json' gerado com sucesso!")
+print(json.dumps(ast, indent=2))
 
 
 # if __name__ == "__main__":
