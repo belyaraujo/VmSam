@@ -12,11 +12,13 @@ function main() {
   } else {
     x = 0;
   }
-  end-if
+  end_if
   return x;
 }
 
 """
+
+
 
 # tokens = tokenize(code)
 # print("---- TOKENS ----")

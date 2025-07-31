@@ -5,9 +5,9 @@ regex_table = {
     # Estruturas de Decisão e Repetição
     r"^if$": "IF",
     r"^else$": "ELSE",
-    r"^end-if$": "END_IF",
+    r"^end_if$": "END_IF",
     r"^while$": "WHILE",
-    r"^end-while$": "END_WHILE",
+    r"^end_while$": "END_WHILE",
     r"^for$": "FOR",
     r"^function$": "FUNCTION",
     r"^return$": "RETURN",
